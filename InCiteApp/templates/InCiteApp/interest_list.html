@@ -1,0 +1,50 @@
+{% extends "base_generic.html" %} {% block content %}
+<div class="container" style="padding-top:10px;">
+<h3>Your Interests</h3>
+<br> 
+{% if article_list %}
+<form method="post">
+    {% csrf_token %}
+    <table class="table table-hover">
+        <thead class="thead-dark">
+        <tr>
+            <th>
+                Select
+            </th>
+            <th>
+                Article Title
+            </th>
+            <th>
+                Citation Impact
+            </th>
+        </tr>
+        </thead>
+        {% for article in article_list %}
+        <tr>
+            <td>
+                <label class="iccontainer">
+                    <input type="checkbox" name="selected" value="{{ article.eid }}">
+                    <span class="iccheckmark"></span>
+                </label>
+            </td>
+            <td>
+                <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+            </td>
+            <td>
+                {{ article.citation_impact }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <button type="submit" name="recommend" value="recommend_btn" class="btn btn-primary">I am feeling lucky!</button>
+    &NonBreakingSpace;
+    &NonBreakingSpace;
+    <button type="submit" name="delete" value="delete_btn" class="btn btn-danger">Delete Selected</button>
+</form>
+{% else %}
+<p>No articles of interest have been selected.</p>
+<a href="{% url 'articles' %}" class="btn btn-info">Articles List</a>
+{% endif %} 
+</div>
+{% endblock %}

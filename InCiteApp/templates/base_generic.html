@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""> {% block title %}
+    <title>InCite</title>
+    {% endblock %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Custom fonts for this template -->
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Cabin:700' rel='stylesheet' type='text/css'>
+
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" href="{% static 'css/simple-sidebar.css' %}">
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="{% static 'js/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="shortcut icon" href="#" />
+
+</head>
+
+<body>
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            {% block sidebar %}
+            <ul class="sidebar-nav" style="margin-top:25px;">
+                <li>
+                    <a href="{% url 'index' %}">Home</a>
+                </li>
+                <li>
+                    <a href="{% url 'articles' %}">Articles</a>
+                </li>
+                <li>
+                    <a href="{% url 'articles-search' %}">Search</a>
+                </li>
+
+
+                {% if user.is_authenticated %}
+                <li style="color:#fff;">User {{ user.get_username }}</li>
+                <li>
+                    <a href="{% url 'interests' %}">Your Interests</a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{% url 'signup' %}">Register</a>
+                </li>
+                <li>
+                    <a href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                </li>
+
+                {% endif %}
+
+            </ul>
+            {% endblock %}
+        </div>
+
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <a href="#menu-toggle" class="btn btn-secondary" id="menu-toggle" style="font-size:14px;">&#9776;</a>
+                <br/>
+                <br/> {% block content %}{% endblock %}
+                <br/> {% block pagination %} {% if is_paginated %}
+                <div class="pagination">
+                    <span class="page-links" style="font-weight:700;">
+                        {% if page_obj.has_previous %}
+                        <a class="btn btn-default btn-sm" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
+                            PREVIOUS
+                        </a>
+                        {% endif %}
+                        <span class="page-current">
+                            PAGE {{ page_obj.number }} OF {{ page_obj.paginator.num_pages }}
+                        </span>
+                        {% if page_obj.has_next %}
+                        <a class="btn btn-default btn-sm" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                            NEXT
+                        </a>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %} {% endblock %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            var element = $("#wrapper");
+            element.toggleClass("toggled");
+            if (element.hasClass("toggled")) {
+                localStorage.setItem('toggled', 'true');
+            } else {
+                localStorage.setItem('toggled', 'false');
+            }
+
+        });
+
+        // On load try to  remember the toggled state
+        var element = $("#wrapper");
+        var toggled = localStorage.getItem('toggled');;
+        element.toggleClass("toggled");
+
+        if (toggled == "true")
+            element.addClass("toggled");
+        else
+            element.removeClass("toggled");
+
+    </script>
+</body>
+
+</html>

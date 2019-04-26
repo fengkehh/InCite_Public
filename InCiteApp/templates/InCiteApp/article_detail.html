@@ -1,0 +1,239 @@
+{% extends "base_generic.html" %} {% load dict_extra %} {% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>
+                    <div style="white-space:wrap;overflow:hidden;text-overflow:ellipsis;">
+                        {{ article.title }}
+                    </div>
+                </h3>
+                <br>
+                <table class="table table-striped">
+                    <tr>
+                        <td>
+                            <strong>Authors</strong>
+                        </td>
+                        <td>
+                            {% for author in authors %}
+                                <div style='font-size:110%;'>
+                                    <a href="{% url 'author-detail' author.id %}">
+                                        {{ author }}
+                                    </a>
+                                </div>
+                                <div style="color:dimgrey">
+                                    {% for institute in author_institutes|get_item:author.id %}
+                                        {{ institute }}
+                                        {% if not forloop.last %}
+                                            ,
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not forloop.last %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>ISSN</strong>
+                        </td>
+                        <td>{{ article.issn }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Full Title</strong>
+                        </td>
+                        <td>{{ article.title }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Journal</strong>
+                        </td>
+                        <td>{{ article.journal }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Publish Date</strong>
+                        </td>
+                        <td>{{ article.publish_date }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Citation Impact</strong>
+                        </td>
+                        <td>{{ article.citation_impact }}</td>
+                    </tr>
+                </table>
+                <form method="post" action="{% url 'article-interest' article.pk %}">
+                    {% csrf_token %}
+                    <button name="add-to-interest" type="submit" class="btn btn-primary float-left">
+                        Add to Interest
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <section>
+                    <script src="https://d3js.org/d3.v4.js"></script>
+                    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+                    <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+                    <script>
+                        // Load json data
+                        d3.json("{% url 'network-json' article.pk %}").then(function (data) {
+                            function getNodeColor(node) {
+                                if (node.group === -1) {
+                                    return '#FF3D00';
+                                } else if (node.group === 1) {
+                                    return '#50c878';
+                                } else {
+                                    return '#29B6F6';
+                                }
+                                // return node.level === 1 ? 'red' : 'gray'
+                            }
+
+                            var nodes = data["nodes"];
+                            var links = data["links"];
+                            var width = 500;
+                            var height = 500;
+                            var radius = 25;
+                            console.log(window.innerHeight);
+                            console.log(window.innerWidth);
+
+                            var svg = d3.select('section').append('svg');
+                            svg
+                                .attr('width', width)
+                                .attr('height', height)
+                                .attr('style', 'outline: thin solid black;');
+
+                            svg.append("svg:defs").append("svg:marker")
+                                .attr("id", "triangle")
+                                .attr("refX", 23.5)
+                                .attr("refY", 6)
+                                .attr("markerWidth", 10)
+                                .attr("markerHeight", 30)
+                                .attr("orient", "auto")
+                                .append("path")
+                                .attr("d", "M 0 0 12 6 0 12 3 6")
+                                .style("fill", "black");
+
+                            let zoom = d3.zoom()
+                                .scaleExtent([1, 5])
+                                .translateExtent([[0, 0], [width, height]])
+                                .on("zoom", function () {
+                                    svg.selectAll('g').attr("transform", d3.event.transform)
+                                });
+
+                            d3.select('svg')
+                                .call(zoom);
+
+                            // simulation setup with all forces
+                            var linkForce = d3
+                                .forceLink()
+                                .id(function (link) {
+                                    return link.id
+                                })
+                                .strength(function (link) {
+                                    return link.strength
+                                });
+
+                            var simulation = d3
+                                .forceSimulation()
+                                .force('link', linkForce)
+                                .force('charge', d3.forceManyBody().strength(-2000))
+                                .force('center', d3.forceCenter(width / 2, height / 2));
+
+                            var linkElements = svg.append('g')
+                                .attr("class", "links")
+                                .selectAll("line")
+                                .data(links)
+                                .enter().append("line")
+                                .attr("stroke-width", 2)
+                                .attr("stroke", "black")
+                                .attr("marker-end", "url(#triangle)");
+
+                            var node = svg.append('g')
+                                .attr("class", "nodes")
+                                .selectAll("circle")
+                                .data(nodes)
+                                .enter().append("a")
+                                .attr("xlink:href", function (d) { return d.id });
+
+                            var nodeElements = node.append("circle")
+                                .attr("r", radius)
+                                .attr("fill", getNodeColor);
+
+                            nodeElements.append("title").text(function (node) {
+                                return node.label
+                            });
+
+
+                            var textElements = node.append("text")
+                                .text(function (node) {
+                                    return node.value
+                                })
+                                .attr("font-size", 15)
+                                .attr("dx", -7)
+                                .attr("dy", 5);
+
+                            textElements.append("title").text(function (node) {
+                                return node.label
+                            });
+
+                            simulation.nodes(nodes).on('tick', () => {
+                                // http://www.puzzlr.org/bounding-box-force-directed-graph/
+                                nodeElements
+                                    .attr('cx', function (node) {
+                                        return node.x = Math.max(radius, Math.min(width - radius, node.x))
+                                    })
+                                    .attr('cy', function (node) {
+                                        return node.y = Math.max(radius, Math.min(height - radius, node.y))
+                                    });
+                                textElements
+                                    .attr('x', function (node) {
+                                        return node.x
+                                    })
+                                    .attr('y', function (node) {
+                                        return node.y
+                                    });
+                                linkElements
+                                    .attr('x1', function (link) {
+                                        return link.source.x
+                                    })
+                                    .attr('y1', function (link) {
+                                        return link.source.y
+                                    })
+                                    .attr('x2', function (link) {
+                                        return link.target.x
+                                    })
+                                    .attr('y2', function (link) {
+                                        return link.target.y
+                                    });
+                            });
+
+                            simulation.force("link").links(links);
+                        });
+                    </script>
+                </section>
+                <section>
+                    <svg width="500" height="150">
+                        <defs>
+                            <marker id="arrow" refX="1.5" refY="6" markerWidth="10" markerHeight="30" orient="auto" fill="black">
+                                <path d="M0 3 6 6 0 9 1.5 6"></path>
+                            </marker>
+                        </defs>
+                        <g>
+                            <circle cy="30" cx ="30" r="10" fill="#29B6F6"></circle>
+                            <text y="35" x="50">Current Article</text>
+                            <circle cy="60" cx ="30" r="10" fill="#FF3D00"></circle>
+                            <text y="65" x="50">Referenced Articles (relative to current)</text>
+                            <circle cy="90" cx ="30" r="10" fill="#50c878"></circle>
+                            <text y="95" x="50">Referencing Articles (relative to current)</text>
+
+                            <line y1="120" y2="120" x1="20" x2="30" stroke="black" stroke-width="2" marker-end="url(#arrow)"></line>
+                            <text y="125" x="50">Flow of Knowledge</text>
+                        </g>
+                    </svg>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}

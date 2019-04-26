@@ -1,0 +1,102 @@
+{% extends "base_generic.html" %}  {% block content %}
+<style>
+  .iclabel {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .ichelptext {
+    color: gray;
+    font-weight: 300;
+    margin-top: 10px;
+  }
+  .icerror {
+    color:indianred;
+    margin-top: 10px;
+  }
+</style>
+<div class="container" style="padding-top:10px;">
+  <h3>Registration</h3>
+  <br>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <ul>
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% for hidden_field in form.hidden_fields %}
+      {% if hidden_field.errors %}
+        <ul>
+          {% for error in hidden_field.errors %}
+            <li>
+              (Hidden field {{ hidden_field.name }}) {{ error }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {{ hidden_field }}
+    {% endfor %}
+
+    {{ form.source.errors }}
+    {{ form.source }}
+
+    <div class="form-group">
+        <div class="iclabel">User Name</div>
+        {{ form.username }}
+        <div class="ichelptext">150 characters or fewer. Letters, digits and symbols (@, period, +, -, _) only.</div>
+        <div class="icerror">{{ form.username.errors }}</div>
+         <!-- username.help_text -->
+    </div>
+    <div class="form-group">
+        <div class="iclabel">First Name</div>
+        {{ form.first_name }}
+        <div class="ichelptext">This field is optional.</div>
+        <div class="icerror">{{ form.first_name.errors }}</div>
+    </div>
+    <div class="form-group">
+        <div class="iclabel">Last Name</div>
+        {{ form.last_name }}
+        <div class="ichelptext">This field is optional.</div>        
+        <div class="icerror">{{ form.last_name.errors }}</div>
+    </div>
+    <div class="form-group">
+        <div class="iclabel">Email</div>
+        {{ form.email }}
+        <div class="ichelptext">This field is required. Please provide a valid email address.</div>        
+        <div class="icerror">{{ form.email.errors }}</div>
+    </div>
+    <div class="form-group">
+        <div class="iclabel">Password</div>
+        {{ form.password1 }}
+        <div class="ichelptext">
+            Your password cannot be too similar to your other 
+            personal information. <br>
+            Your password must contain at least 8 characters. <br>
+            Your password cannot be a commonly used password. <br>
+            Your password cannot be entirely numeric. <br>
+        </div>
+        <div class="icerror">{{ form.password1.errors }}</div>
+    </div>
+    <div class="form-group">
+        <div class="iclabel">Password Confirmation</div>
+        {{ form.password2 }}
+        <div class="ichelptext">
+            Please enter the same password as before for verification.  
+        </div>
+        <div class="icerror">{{ form.password2.errors }}</div>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Register</button>
+  </form>
+
+</div>
+{% endblock %}

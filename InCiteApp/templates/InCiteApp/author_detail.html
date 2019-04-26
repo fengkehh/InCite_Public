@@ -1,0 +1,93 @@
+{% extends "base_generic.html" %} {% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h3>
+                    <div style="white-space:wrap;overflow:hidden;text-overflow:ellipsis;">
+                        {{ author }}
+                    </div>
+                </h3>
+                <br>
+                <table class="table table-striped">
+                    <tr>
+                        <td>
+                            <strong>Affiliations</strong>
+                        </td>
+                        <td>{% for institute in institutes %}
+                            <li>{{ institute }}</li>
+                            {% if not forloop.last %}{% endif %}
+                        {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Number of Articles</strong>
+                        </td>
+                        <td>
+                            {{ num_articles }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Citations</strong>
+                        </td>
+                        <td>
+                            {{ total_citation.citation_impact__sum }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Average Citations</strong>
+                        </td>
+                        <td>
+                            {{ avg_citation.citation_impact__avg }}
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h5>Articles</h5>
+                {% if articles %}
+                <table class="table table-hover">
+                    <tr>
+                        <th>
+                            Title
+                        </th>
+                        <th>
+                            Publish Date
+                        </th>
+                    </tr>
+                    {% for article in articles %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'article-detail' article.eid %}">
+                                <!-- &NonBreakingSpace; -->
+                                &NonBreakingSpace; 
+                                {{ article }} 
+                                
+                            </a>
+                        </td>
+                        <td>
+                            {{ article.publish_date }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% endif %}
+
+
+            </div>
+        </div>
+    </div>
+
+<!--
+    <tr>
+            <td>
+                <strong>Articles</strong>
+            </td>
+            <td>
+                {% for article in articles %}
+                    <li><a href="{% url 'article-detail' article.eid %}">{{ article }} ({{ article.publish_date }})</a></li>
+                    {% if not forloop.last %}<br>
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+    -->
+{% endblock %}

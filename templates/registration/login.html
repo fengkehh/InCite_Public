@@ -1,0 +1,99 @@
+{% extends "base_generic.html" %} {% block content %}
+
+<style>
+    .iclabel {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .ichelptext {
+        color: gray;
+        font-weight: 300;
+        margin-top: 10px;
+    }
+
+    .icerror {
+        color: indianred;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container" style="padding-top:10px;">
+    <h3>InCite Login</h3>
+    <hr>
+    {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+    {% endif %} 
+    {% if next %} 
+    {% if user.is_authenticated %}
+        <p>Your account doesn't have access to this page.</p>
+    {% else %}
+        <h6>Login required</h6>
+        <div>You are not currently logged in yet.</div>
+    {% endif %} {% endif %}
+    <br>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <div class="iclabel">User Name</div>
+            {{ form.username }}
+            <div class="icerror">{{ form.username.errors }}</div>
+        </div>
+        <div class="form-group">
+            <div class="iclabel">Password</div>
+            {{ form.password }}
+            <div style="margin-top:8px;">
+                <a href="{% url 'password_reset' %}">Forgot password?</a>
+            </div>
+            <div class="icerror">{{ form.password.errors }}</div>
+        </div>
+        <br>
+        <input type="submit" value="Login" class="btn btn-primary" />
+        <input type="hidden" name="next" value="{{ next }}" />
+        &NonBreakingSpace; <span style="font-size:1rem;">OR</span> &NonBreakingSpace;
+        <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
+    </form> 
+
+
+
+</div>
+
+
+
+
+<!--
+
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+
+    <div>
+        <td>{{ form.username.label_tag }}</td>
+        <td>{{ form.username }}</td>
+    </div>
+    <div>
+        <td>{{ form.password.label_tag }}</td>
+        <td>{{ form.password }}</td>
+    </div>
+
+    <div>
+        <input type="submit" value="login" />
+        <input type="hidden" name="next" value="{{ next }}" />
+    </div>
+</form>
+
+<p>
+    <a href="{% url 'password_reset' %}">Lost password?</a>
+</p>
+<p>
+        <a href="{% url 'password_reset' %}">Forgot password?</a>
+    <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
+</p>
+
+-->
+
+
+{% endblock %}
