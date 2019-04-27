@@ -2,6 +2,6 @@ pytoml
 requests
 nltk # also need to use nltk.download() to install punkt and wordnet
 mysqlclient
-django==2.0.11
+django==2.0.13
 django-mysql
 django-lockdown
